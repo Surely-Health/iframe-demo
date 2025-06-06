@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Input and Iframe Loader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #999;
+        }
+
+        .button-container {
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .iframe-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 1064px;
+            width: 100%;
+            display: none;
+        }
+
+        .iframe-container.show {
+            display: block;
+        }
+
+        .iframe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .iframe-title {
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: auto;
+        }
+
+        .close-btn:hover {
+            background: #ff3742;
+            transform: translateY(-1px);
+        }
+
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            iframe {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Token Input</h1>
+        <div class="form-group">
+            <label for="tokenInput">Enter your token:</label>
+            <textarea 
+                id="tokenInput" 
+                placeholder="Paste your token here..."
+                rows="4"
+            ></textarea>
+        </div>
+        <div class="button-container">
+            <button id="submitBtn" disabled>Load Application</button>
+        </div>
+    </div>
+
+    <div class="iframe-container" id="iframeContainer">
+        <div class="iframe-header">
+            <div class="iframe-title">Season Health Application</div>
+            <button class="close-btn" id="closeBtn">Close</button>
+        </div>
+        <iframe 
+            id="appIframe"
+            title="Season Health Application"
+            allow="camera; microphone"
+        ></iframe>
+    </div>
+
+    <script>
+        const tokenInput = document.getElementById('tokenInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const appIframe = document.getElementById('appIframe');
+        const closeBtn = document.getElementById('closeBtn');
+
+        // Enable/disable button based on textarea content
+        tokenInput.addEventListener('input', function() {
+            const hasContent = this.value.trim().length > 0;
+            submitBtn.disabled = !hasContent;
+        });
+
+        // Handle submit button click
+        submitBtn.addEventListener('click', function() {
+            const token = tokenInput.value.trim();
+            if (token) {
+                const iframeUrl = `https://stage-app.seasonhealth.com/patient/aci?token=${encodeURIComponent(token)}`;
+                appIframe.src = iframeUrl;
+                iframeContainer.classList.add('show');
+                
+                // Scroll to iframe
+                iframeContainer.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+
+        // Handle close button click
+        closeBtn.addEventListener('click', function() {
+            iframeContainer.classList.remove('show');
+            appIframe.src = '';
+            
+            // Scroll back to top
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Handle Enter key in textarea (optional enhancement)
+        tokenInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && !submitBtn.disabled) {
+                e.preventDefault();
+                submitBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
