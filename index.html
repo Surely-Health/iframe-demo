@@ -240,7 +240,7 @@
             const token = tokenInput.value.trim();
             const appointmentId = appointmentIdInput.value.trim();
             if (token && appointmentId) {
-                const iframeUrl = `https://stage-api.seasonhealth.com/patient/aci/appointments/telehealth-meeting/${encodeURIComponent(appointmentId)}?token=${encodeURIComponent(token)}`;
+                const iframeUrl = `https://stage-app.seasonhealth.com/patient/aci/appointments/telehealth-meeting/${encodeURIComponent(appointmentId)}?token=${encodeURIComponent(token)}`;
                 appIframe.src = iframeUrl;
                 iframeContainer.classList.add('show');
                 
